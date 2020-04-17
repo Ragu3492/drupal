@@ -21,7 +21,6 @@ sudo drush dl drupal-8
 cd /var/www/html/drupal-8.8.5/sites/default/
 sudo cp default.settings.php settings.php
 sudo chown -R apache:apache /var/www/html/drupal-8.8.5/
-sudo chown -R apache:apache /var/www/html/drupal-8.8.5/
 sudo setenforce 0
 cd /var/www/html/
 sudo mv drupal-8.8.5 drupal
