@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('terraform started') {
             steps {
-                sh 'echo "Started...!" '
+                sh 'echo "Started" '
             }
         }
         stage('terraform clone') {
@@ -19,16 +19,16 @@ pipeline {
         stage('Parameters'){
             steps {
                 sh label: '', script: ''' sed -i \"s/user/$access_key/g\" /var/lib/jenkins/workspace/drupal/variables.tf
-sed -i \"s/password/$secret_key/g\" /var/lib/jenkins/workspace/drupal/variables.tf
-sed -i \"s/t2.micro/$instance_type/g\" /var/lib/jenkins/workspace/drupal/variables.tf
-sed -i \"s/10/$instance_size/g\" /var/lib/jenkins/workspace/drupal/ec2.tf
-sed -i \"s/ap-south-1/$instance_region/g\" /var/lib/jenkins/workspace/drupal/variables.tf
-sed -i \"s/ap-south-1a/$availability_zone/g\" /var/lib/jenkins/workspace/drupal/variables.tf
-sed -i \"s/Karthi-keys/$key/g\" /var/lib/jenkins/workspace/drupal/variables.tf
-sed -i \"s/ami-0470e33cd681b2476/$Image/g\" /var/lib/jenkins/workspace/drupal/variables.tf
-'''
-                  }
+                sed -i \"s/password/$secret_key/g\" /var/lib/jenkins/workspace/drupal/variables.tf
+                sed -i \"s/t2.micro/$instance_type/g\" /var/lib/jenkins/workspace/drupal/variables.tf
+                sed -i \"s/10/$instance_size/g\" /var/lib/jenkins/workspace/drupal/ec2.tf
+                sed -i \"s/us-east-1/$instance_region/g\" /var/lib/jenkins/workspace/drupal/variables.tf
+                sed -i \"s/us-east-1a/$availability_zone/g\" /var/lib/jenkins/workspace/drupal/variables.tf
+                sed -i \"s/karthinv/$key/g\" /var/lib/jenkins/workspace/drupal/variables.tf
+                sed -i \"s/ami-0323c3dd2da7fb37d/$Image/g\" /var/lib/jenkins/workspace/drupal/variables.tf
+                '''
             }
+        }
             
         stage('terraform init') {
             steps {
@@ -43,23 +43,29 @@ sed -i \"s/ami-0470e33cd681b2476/$Image/g\" /var/lib/jenkins/workspace/drupal/va
         stage('terraform apply') {
             steps {
                 sh 'terraform apply  -auto-approve'
-              
+                sleep 90
             } 
         }
         stage('drupal deployment') {
             steps {
                 sh label: '', script: '''pubIP=$(<publicip)
                 echo "$pubIP"
-                ssh -tt ec2-user@$pubIP
-                echo "yes"
-                sleep 5
+                ssh -tt -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@$pubIP /bin/bash  << EOF
                 git clone -b deploy https://github.com/1996karthick/drupal.git
                 cd drupal
-                bash deploy.sh
+                chmod 755 deploy.sh
+                ./deploy.sh
+                EOF
                 '''
-              
             } 
         }
         
+        stage('Deployed') {
+            steps {
+                sh label: '', script: '''rm -rf publicip
+                echo "Deployed"
+                '''
+            }
+        }
     }
-}
+}	
