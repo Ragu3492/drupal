@@ -15,6 +15,8 @@ sudo systemctl restart httpd
 sudo yum -y install mariadb-server
 sudo systemctl start mariadb && sudo systemctl enable mariadb
 
+sudo /bin/su - root
+sleep 5
 sudo echo "CREATE DATABASE zippyops_db CHARACTER SET utf8 COLLATE utf8_general_ci;;" | mysql
 sudo echo "CREATE USER 'zippyops'@'localhost' IDENTIFIED BY 'zippyops';" | mysql
 sudo echo "GRANT ALL PRIVILEGES ON zippyops_db.* TO 'zippyops'@'localhost';" | mysql
